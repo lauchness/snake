@@ -44,15 +44,13 @@ const resetBoard = () => {
   for (let i = 0; i < Dimensions.height; i++) {
     board[i] = [...columns];
   }
-  eggs.forEach((egg) => {
-    board[egg[0]][egg[1]] = ".";
-  });
 };
 
 const endGame = () => {
   clearInterval(tickTimer);
   console.clear();
   console.log("Game Over");
+  console.log(`Your score was ${snake.length}`);
   console.log(`Press "q" to quit`);
 };
 
@@ -60,10 +58,17 @@ const eatEggs = (coord: [number, number]) => {
   const eggHit = eggs.findIndex(
     (egg) => egg[0] === coord[0] && egg[1] === coord[1]
   );
-  if (eggHit) {
-    eggs = eggs.splice(eggHit, 1);
+  if (eggHit !== -1) {
+    eggs = [...eggs.slice(0, eggHit), ...eggs.slice(eggHit + 1, eggs.length)];
   }
   return eggHit !== -1;
+};
+
+const checkCollision = (coord: [number, number]) => {
+  const snakeExistsAt = snake.findIndex(
+    (snakeCoord) => snakeCoord[0] === coord[0] && snakeCoord[1] === coord[1]
+  );
+  return snakeExistsAt !== -1;
 };
 
 const tick = () => {
@@ -104,13 +109,20 @@ const tick = () => {
     default:
       nextCoord = [snake[0][0], snake[0][1]];
   }
+  if (checkCollision(nextCoord)) {
+    return endGame();
+  }
   if (eatEggs(nextCoord)) {
     snake = [nextCoord, ...snake];
   } else {
     snake = [nextCoord, ...snake.slice(0, snake.length - 1)];
   }
+
   snake.forEach((coord) => {
     board[coord[0]][coord[1]] = "█";
+  });
+  eggs.forEach((egg) => {
+    board[egg[0]][egg[1]] = "0";
   });
   printBoard(board);
 };
@@ -142,7 +154,7 @@ const init = () => {
     if (key && key.name == "q") process.exit();
   });
 
-  tickTimer = setInterval(tick, 500);
+  tickTimer = setInterval(tick, 200);
 };
 
 init();
