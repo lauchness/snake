@@ -24,7 +24,7 @@ let snake: [number, number][] = [[0, Dimensions.width / 2]];
 
 let eggs: [number, number][] = [];
 
-let currentDirection: Directions = Directions.West;
+let currentDirection: Directions = Directions.South;
 
 let tickTimer: NodeJS.Timer;
 
@@ -51,6 +51,7 @@ const endGame = () => {
   console.clear();
   console.log("Game Over");
   console.log(`Your score was ${snake.length}`);
+  console.log(`Press "r" to restart`);
   console.log(`Press "q" to quit`);
 };
 
@@ -128,33 +129,42 @@ const tick = () => {
 };
 
 const init = () => {
+  snake = [[0, Dimensions.width / 2]];
+
+  eggs = [];
+
+  currentDirection = Directions.South;
+
   for (let i = 0; i < Dimensions.height; i++) {
     board[i] = [...columns];
   }
 
-  readline.emitKeypressEvents(process.stdin);
-
-  if (process.stdin.isTTY) process.stdin.setRawMode(true);
-
-  process.stdin.on("keypress", (chunk, key) => {
-    switch (key.name) {
-      case "up":
-        currentDirection = Directions.North;
-        break;
-      case "right":
-        currentDirection = Directions.East;
-        break;
-      case "down":
-        currentDirection = Directions.South;
-        break;
-      case "left":
-        currentDirection = Directions.West;
-        break;
-    }
-    if (key && key.name == "q") process.exit();
-  });
-
   tickTimer = setInterval(tick, 200);
 };
+
+readline.emitKeypressEvents(process.stdin);
+
+if (process.stdin.isTTY) process.stdin.setRawMode(true);
+
+process.stdin.on("keypress", (chunk, key) => {
+  switch (key.name) {
+    case "up":
+      currentDirection = Directions.North;
+      break;
+    case "right":
+      currentDirection = Directions.East;
+      break;
+    case "down":
+      currentDirection = Directions.South;
+      break;
+    case "left":
+      currentDirection = Directions.West;
+      break;
+  }
+  if (key && key.name == "q") process.exit();
+  if (key && key.name === "r") {
+    init();
+  }
+});
 
 init();
